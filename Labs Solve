@@ -1,0 +1,431 @@
+1. 다음과 같이 int형 vector 클래스의 객체를 선언하고 객체에 새로운 데이터를 push_back() 을 여러번 호출하도록 코드를 수정하라.
+push_back() 함수를 호출할 때 마다 객체에 대해 size와 capacity를 구해서 값의 변화를 분석하라
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+int main(int argc, char const* argv[])
+{
+   vector <int> v1;
+   for (int i = 0; i < 50; i++) 
+   {
+      v1.push_back(10);
+      cout << v1.size() << endl;
+      cout << v1.capacity() << endl;
+   }
+}
+분석: 4번 반복했을 때 까지의 결과는 size와 capacity 둘다 같음. 
+그러나 5번째 반복 부터 capacity가 size보다 1씩 높아지기 시작하더니 마지막 50번째 반복에선 13의 차이가 남. 
+이때 capacity 값의 증가폭이 일정한 패턴을 가지고 증가하고 있음.
+조사 결과, capacity는 현재 가지고 있는 원소의 개수보다 더 많은 공간을 할당해 놓음.
+
+2. 클래스 템플릿 vector를 사용한 프로그램이다. 프로그램 수행 결과를 예측하고 실행 결과의 비교하고 vector 분석하라.
+#include <vector>
+#include <iostream>
+using namespace std;
+int main()
+{
+  vector<int> v1, v2, v3;
+
+  v1.push_back(10);
+  v1.push_back(20);
+  v1.push_back(30);
+  v1.push_back(40);
+  v1.push_back(50);
+
+  cout << "v1 = ";
+  for (auto& v : v1){
+     cout << v << " ";
+  }
+  cout << endl;
+
+  v2.assign(v1.begin(), v1.end());
+  cout << "v2 = ";
+  for (auto& v : v2){
+     cout << v << " ";
+  }
+   cout << endl;
+
+   v3.assign(3, 6);
+   cout << "v3 = ";
+   for (auto& v : v3){
+       cout << v << " ";
+   }
+   cout << endl;
+
+   v3.assign({ 5, 6, 7 });
+   for (auto& v : v3){
+      cout << v << " ";
+  }
+  cout << endl;
+  
+  int &i = v1.at(0);
+  
+  cout << "v1 첫 번째 원소의 값:  " << i << endl; 
+
+  if(v1 == v2) cout << "v1과 v2는 같다." << endl;
+  else cout << "v1과 v2는 다르다" << endl;
+  
+  i = 80;
+  const int &j = v1.at(0);
+  
+  cout << "값을 변경 후 v1 첫 번째 원소의 값:  " << j << endl; 
+
+  if(v1 == v2) cout << "v1과 v2는 같다." << endl;
+  else cout << "v1과 v2는 다르다" << endl;
+}
+예측
+v1 = 10 20 30 40 50
+v2 = 10 20 30 40 50
+v3 = 3 6
+v3 = 5 6 7
+v1 첫 번째 원소의 값: 10
+v1과 v2는 같다.
+값을 변경 후 v1 첫 번째 원소의 값: 80
+v1과 v2는 다르다
+
+결과
+v1 = 10 20 30 40 50
+v2 = 10 20 30 40 50
+v3 = 6 6 6
+5 6 7
+v1 첫 번째 원소의 값:  10
+v1과 v2는 같다.
+값을 변경 후 v1 첫 번째 원소의 값:  80
+v1과 v2는 다르다
+
+해석: assign()함수는 assign(size_type count, const T& value)의 형태를 띈다.
+이는 count개의 value를 채운다 라는 뜻.
+즉
+v3.assign(3, 6)은 -> 3개의 6으로 구성된 vector 생성
+
+3. 사각형을 표현하는 클래스를 정의하고 클래스를 vector 를 이용하여 저장하고 처리하는 프로그램을 작성하라
+#include <iostream>
+#include <vector>
+using namespace std;
+
+// 사각형 클래스
+class Rectangle {
+private:
+    int width;
+    int height;
+
+public:
+    Rectangle(int w = 0, int h = 0) : width(w), height(h) {}
+
+    int getWidth() const { return width; }
+    int getHeight() const { return height; }
+
+    int area() const { return width * height; }
+
+    void print() const {
+        cout << "Rectangle (w=" << width << ", h=" << height
+             << ", area=" << area() << ")" << endl;
+    }
+};
+
+int main() {
+    vector<Rectangle> rects;
+
+    // 벡터에 사각형 객체 저장
+    rects.push_back(Rectangle(3, 4));
+    rects.emplace_back(10, 20);
+    rects.emplace_back(5, 5);
+
+    cout << "저장된 사각형 출력" << endl;
+    for (const auto& r : rects) {
+        r.print();
+    }
+
+    // 총 면적 계산
+    int totalArea = 0;
+    for (const auto& r : rects) {
+        totalArea += r.area();
+    }
+
+    cout << "총 면적 = " << totalArea << endl;
+
+    return 0;
+}
+
+
+4. 다음 프로그램의 실행 결과를 분석하라.
+#include <vector>
+#include <iostream>
+using namespace std;
+int main()
+{
+  vector<int> v1(5);
+  v1.push_back(3);
+
+  cout << v1.capacity() << endl;
+  cout << v1.size() << endl;
+}
+결과
+7
+6
+해석: size가 객체의 최대 용량을 '검색'하는 느낌이라면 capacity는 객체의 최대 용량을 '정해 놓는' 함수라고 생각 할 수 있다.
+vector<int> v1(5); 의 실행으로 메모리 어딘가에 v1에 해당하는 5개의 칸이 만들어졌다. 이후 v1.push_back(3); 실행으로 새로운 값이 하나 추가되었다. 
+때문에 v1의 최대 용량은 6, size()실행시 6이 출력되었다. 
+그런데 여기서 capacity는 이미 한번 새로운 메모리(push_back)가 추가되었으니 또 다시 새로운 메모리가 추가될 수 있는 가능성을 생각하여 v1의 최대 용량을 7로 '늘려놓았다.'
+이를 증명하는 방법은 간단하다 size()를 주석 처리 하면 v1의 용량은 처음부터 5로 생성됐다. 때문에 capacity는 5를 뱉어낸다.
+
+5. 4번의 프로그램에서 3 저장되는 위치는?
+답변: push_back()은 Vector의 마지막에 새로운 원소를 추가하기 위해 임시 객체를 하나 만들어서 거기에 값을 복사 후, 
+Vector에 삽입하는 과정을 거친다. 즉 3은 Vector의 마지막 위치에 저장되었다.
+
+6. 4의 프로그램에서 첫 번째 위치에 데이터 10을 저장하는 프로그램을 작성하라.
+#include <vector>
+#include <iostream>
+using namespace std;
+
+int main()
+{
+    vector<int> v1(5);   // size = 5
+    v1.push_back(3);     // size = 6
+
+    v1[0] = 10;          // 첫 번째 위치에 10 저장
+
+    cout << "capacity: " << v1.capacity() << endl;
+    cout << "size: " << v1.size() << endl;
+
+    cout << "v1 내용: ";
+    for (auto &x : v1) {
+        cout << x << " ";
+    }
+    cout << endl;
+
+    return 0;
+}
+
+7. 아래의 링크를 참조하여 vector 클래스의 다른 멤버 함수와 연산자를 활용한 프로그램을 작성하라.
+https://learn.microsoft.com/ko-kr/cpp/standard-library/vector-operators?view=msvc-170
+#include <iostream>
+#include <vector>
+using namespace std;
+
+void printVector(const vector<int>& v, const string& name)
+{
+    cout << name << " = ";
+    for (auto& x : v) cout << x << " ";
+    cout << "(size=" << v.size() << ", cap=" << v.capacity() << ")" << endl;
+}
+
+int main()
+{
+    vector<int> a;
+    vector<int> b;
+
+    // push_back 사용
+    a.push_back(1);
+    a.push_back(2);
+    a.push_back(3);
+
+    b.assign({1, 2, 4});   // assign 사용
+
+    cout << "===== 초기 상태 =====" << endl;
+    printVector(a, "a");
+    printVector(b, "b");
+
+    // 비교 연산자 테스트
+    cout << "\n===== 비교 결과 =====" << endl;
+
+    cout << "(a == b): " << (a == b) << endl;
+    cout << "(a != b): " << (a != b) << endl;
+    cout << "(a <  b): " << (a < b) << endl;
+    cout << "(a <= b): " << (a <= b) << endl;
+    cout << "(a >  b): " << (a > b) << endl;
+    cout << "(a >= b): " << (a >= b) << endl;
+
+    // vector 데이터 접근
+    cout << "\n===== 원소 접근 =====" << endl;
+    cout << "a.front() = " << a.front() << endl;
+    cout << "a.back()  = " << a.back() << endl;
+    cout << "a.at(1)   = " << a.at(1) << endl;
+
+    // 벡터 수정
+    a[1] = 20;   // operator[] 사용
+    b.push_back(5);
+    b.push_back(6);
+
+    cout << "\n===== 변경 후 =====" << endl;
+    printVector(a, "a");
+    printVector(b, "b");
+
+    // clear, empty 사용
+    a.clear();
+    cout << "\n===== a.clear() 후 =====" << endl;
+    cout << "a.empty() = " << a.empty() << endl;
+    printVector(a, "a");
+
+    return 0;
+}
+
+
+8. SampleCodes/STL 디렉토리의 vector_sample.cc 파일을 기반으로 vector 클래스의 멤버 함수를 검증하는 함수를 작성하라.
+#include <iostream>
+#include <vector>
+using namespace std;
+
+void assignTest() {
+    vector <int> v1, v2, v3, v4;
+
+    v1.push_back(10);
+    v1.push_back(20);
+    v1.push_back(30);
+    v1.push_back(40);
+    v1.push_back(50);
+    
+    cout << "the value of elements of v1 " << endl;
+    for(auto& e : v1) cout << e << ",";
+    cout << endl;
+    cout << "the capacity of v1: " << v1.capacity() << endl;
+
+    cout << "the value of elements of v2 after assign" << endl;
+    v2.assign(v1.begin(), v1.end());
+    cout << "the size of v2: "<< v2.size() << endl;
+    cout << "the capacity of v2: " << v2.capacity() << endl;
+    for(auto& e : v2) cout << e << ",";
+    cout << endl;
+
+    v3.assign(10 , 3);
+    cout << "the result of v3.assign(10 , 3): " << endl;
+    cout << "the size of v3: " << v3.size() << endl; 
+    cout << "the capacity of v3: " << v3.capacity() << endl; 
+    for(auto& e : v3) cout << e << ", ";
+    cout << endl;
+
+    v4.assign({5, 6, 7, 8});
+    cout << "the result of v4.assign({5, 6, 7, 8}): " << endl;
+    cout << "the size of v4: " << v4.size() << endl; 
+    cout << "the capacity of v4: " << v4.capacity() << endl;   
+    for(auto& e : v4) cout << e << ", ";
+    cout << endl;   
+}
+
+void itrTest() {
+    vector <int> v1;
+    vector <int>::iterator v1_itr;
+
+    v1.push_back(10);
+    v1.push_back(20);
+    v1.push_back(30);
+    v1.push_back(40);
+    v1.push_back(50);
+
+    v1_itr = v1.begin();
+    cout << "Access the data through the iterator" << endl;
+    for( ; v1_itr != v1.end(); v1_itr++) cout << *v1_itr << ", ";
+    cout << endl;
+    
+    v1_itr = v1.begin();
+    cout << "Add 100 to every element in the vector through the iterator" << endl;
+    for( ; v1_itr != v1.end(); v1_itr++) *v1_itr += 100;
+
+    cout << "Access the element with range-for" << endl;
+    for(auto& e : v1) cout << e << ", ";
+    cout << endl; 
+
+    cout << "Access the element with normal for-loop" << endl;
+    for(int i = 0; i < v1.size(); i++) cout << v1[i] << ", ";
+    cout << endl;
+}
+
+void sizeTest() {
+    vector <int> v1;
+    v1.push_back(10);
+    v1.push_back(20);
+    v1.push_back(30);
+    cout << "size of vector: " << v1.size() << endl;
+}
+
+void capacityTest() {
+    vector <int> v1;
+    v1.push_back(10);
+    v1.push_back(20);
+    v1.push_back(30);
+    cout << "capacity of vector: " << v1.capacity() << endl;
+}
+
+void atTest() {
+    vector <int> v1;
+    v1.push_back(10);
+    v1.push_back(20);
+    v1.push_back(30); 
+
+    cout << "v1.at(1) before change = " << v1.at(1) << endl;
+
+    int& e = v1.at(1);
+    e = 60;
+
+    cout << "v1.at(1) after  change = " << v1.at(1) << endl;
+}
+
+void backTest() {
+    vector<int> v1 = {10, 20, 30, 40};
+
+    cout << "front(): " << v1.front() << endl;
+    cout << "back():  " << v1.back()  << endl;
+
+    v1.back() = 99;
+    cout << "after modifying back(), new back() = " << v1.back() << endl;
+}
+
+void beginEndTest() {
+    vector<int> v1 = {5, 6, 7, 8};
+
+    cout << "Print using begin() and end()" << endl;
+    for(auto itr = v1.begin(); itr != v1.end(); itr++)
+        cout << *itr << ", ";
+    cout << endl;
+
+    cout << "distance(begin, end) = " << v1.end() - v1.begin() << endl;
+}
+
+void clearTest() {
+    vector<int> v1 = {1, 2, 3, 4};
+
+    cout << "Before clear: size=" << v1.size() 
+         << ", empty=" << v1.empty() << endl;
+
+    v1.clear();
+
+    cout << "After clear:  size=" << v1.size() 
+         << ", empty=" << v1.empty() << endl;
+
+    v1.push_back(100);
+    cout << "After push_back: size=" << v1.size() 
+         << ", empty=" << v1.empty() << endl;
+}
+
+
+int main()
+{
+    cout << "===== iterator test =====" << endl;
+    itrTest();
+
+    cout << "\n===== assign test =====" << endl;
+    assignTest();
+
+    cout << "\n===== size test =====" << endl;
+    sizeTest();
+
+    cout << "\n===== capacity test =====" << endl;
+    capacityTest();
+
+    cout << "\n===== at test =====" << endl;
+    atTest();
+
+    cout << "\n===== back/front test =====" << endl;
+    backTest();
+
+    cout << "\n===== begin/end test =====" << endl;
+    beginEndTest();
+
+    cout << "\n===== clear/empty test =====" << endl;
+    clearTest();
+
+    return 0;
+}
+
